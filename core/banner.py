@@ -7,7 +7,7 @@ from os import walk
 from os.path import join
 from utilities.color import blue, yellow
 from settings import PACKAGE_INFO
-
+from glob import glob
 
 def starting_console() -> None:
     for _ in range(5):
@@ -78,14 +78,18 @@ def starting_console() -> None:
     print(success("Started Metasploit-Toolkit Console."))
 
 def count_module(module_path) -> dict:
-    exploits = sum(1 for _, _, files in walk(join(module_path, "exploit")) for f in files)
-    auxiliaries = sum(1 for _, _, files in walk(join(module_path, "auxiliary")) for f in files)
+    dirs = glob(f"{module_path}/*/", recursive = True)
+    modules = []
+    info = {}
+    for dir in dirs:
+        modules.append(
+            (dir.replace(module_path, "").replace("/",""))
+        )
+    for module in modules:
+        info[module] = sum(1 for _, _, files in walk(join(module_path, module)) for f in files)
     current_thread().return_value = {
-        "total": exploits+auxiliaries,
-        "exploit": exploits,
-        "auxiliary": auxiliaries
-    }
-
+        "total": sum(info.values())
+    } | info
 
 
 def mst_banner() -> Figlet:
@@ -136,7 +140,7 @@ def banner(module_path):
 
     print(mst_banner())
     print(success(f"Total Modules: {modules['total']}"))
-    del modules['total']
     for module, no_of_module in modules.items():
-        print(blue(module.title()), yellow(no_of_module), sep=": ", end="\t")
+        if module not in ["__pycache__", "total"]:
+            print(blue(module.title()), yellow(no_of_module), sep=": ", end="\t")
     print()
