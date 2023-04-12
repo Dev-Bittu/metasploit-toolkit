@@ -4,7 +4,11 @@ from utilities.color import red
 from settings import BASE_DIR
 
 def main():
-    console = Console()
+    """
+    The main function from where console get started.
+    """
+
+    console = Console() #Console object
     try:
         console.start_console()
     finally:

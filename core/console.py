@@ -14,7 +14,8 @@ from os.path import (
 from core.update import check_update
 from utilities.color import (
     underline,
-    green
+    green,
+    blue
 )
 from utilities.screen_cleaner import clear
 from importlib import import_module
@@ -22,12 +23,19 @@ from prettytable import PrettyTable
 
 
 class Console:
+    """
+    The Console class.
+    """
     def __init__(self) -> None:
         self.auther = "Dev-Bittu (Bittu)"
         self.shell_input = f"{underline('mst')} > "
         self.current_module = None
 
     def console(self):
+        """
+        get input by console,
+        and response according to shell_input
+        """
         print("\n")
         while True:
             query = input(self.shell_input).strip().lower()
@@ -45,11 +53,19 @@ class Console:
             elif "set " in query:
                 s = query.replace("set ","").strip().split(" ")
                 self.set_option(option=s[0], value=s[1])
+            elif query in ("run", "exploit"):
+                self.run()
+            elif query == "info":
+                self.info()
             else:
                 print(info(f"Command \"{query}\" not found. Executing in system"))
                 system(query)
 
     def start_console(self):
+        """
+        Show banner, 
+        and Check pdate
+        """
         banner_thread = Thread(target=banner,args=(join(BASE_DIR, "modules"),))
         update_thread = Thread(target=check_update,args=())
         
@@ -60,9 +76,16 @@ class Console:
         banner_thread.join()
 
     def help(self):
+        """
+        Show basic information
+        """
         print('This is help')
 
     def load_module(self, module_name):
+        """
+        Load module, 
+        when "use " get called
+        """
         if self.is_module_exists(module_name):
             m = import_module(
                 join("modules", module_name).replace("/","."), 
@@ -77,9 +100,15 @@ class Console:
             )
 
     def is_module_exists(self, module_name) -> bool:
+        """
+        Check if module_name exists.
+        """
         return exists(join(BASE_DIR, "modules", module_name+".py"))
     
     def set_option(self, option, value):
+        """
+        Set option with value to current module
+        """
         if self.current_module is None:
             print(
                 warn("Currently any module is not using.")
@@ -95,11 +124,10 @@ class Console:
                 )
 
     def show_options(self):
-        if self.current_module is None:
-            print(
-                warn("Currently any module is not using.")
-            )
-        else:
+        """
+        Show all options and their values (required/optional) in prompt
+        """
+        if self.module_status():
             required_options_table = PrettyTable()
             required_options_table.field_names = ["option", "value", "default", "description"]
             for required_option in self.current_module.options["required"]:
@@ -126,3 +154,37 @@ class Console:
             print(required_options_table)
             print(green("\nOPTIONAL OPTIONS:"))
             print(optional_options_table)
+    
+    def run(self):
+        """
+        Start execution of module,
+        run/exploit command will start this method
+        """
+        if module:=self.module_status():
+            module.run()
+
+    def info(self):
+        """
+        Show information about current module,
+        like its's Auther, Options ,, Reference Links
+        """
+        print(f"{blue('Module Type')}: {self.current_module.type}\t{blue('Module Name')}: {self.current_module.module_name}\n")
+        print(f"{blue('Required Options')}: {self.current_module.options['required'].keys()}\n")
+        print(f"{blue('Optional Options')}: {self.current_module.options['optional'].keys()}\n")
+        print(f"{blue('About the exploit')}:\n{self.current_module.about}\n")
+        print(f"{blue('Auther')}: {self.current_module.auther}\n")
+        print(f"{blue('Reference Links')}: {self.current_module.reference_links}\n")
+
+    def module_status(self):
+        """
+        Check, Is current module none.
+        return:
+            None, if current_module is None and print a msg
+            Module Object, if current_module is not None
+        """
+        if self.current_module is None:
+            return print(
+                warn("Not any module using")
+            )
+        else:
+            return self.current_module

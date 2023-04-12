@@ -10,6 +10,9 @@ from settings import PACKAGE_INFO
 from glob import glob
 
 def starting_console() -> None:
+    """
+    Show prompt "starting mestasploit-toolkit"
+    """
     for _ in range(5):
         print(success("Starting metasploit-toolkit console... /"), end="\r")
         sleep(.2)
@@ -78,21 +81,29 @@ def starting_console() -> None:
     print(success("Started Metasploit-Toolkit Console."))
 
 def count_module(module_path) -> dict:
+    """
+    Count total numbers of modules,
+    return a dict type object.
+    """
     dirs = glob(f"{module_path}/*/", recursive = True)
     modules = []
     info = {}
     for dir in dirs:
-        modules.append(
-            (dir.replace(module_path, "").replace("/",""))
-        )
+        if "__pycache__" not in dir:
+            modules.append(
+                (dir.replace(module_path, "").replace("/",""))
+            )
     for module in modules:
-        info[module] = sum(1 for _, _, files in walk(join(module_path, module)) for f in files)
+        info[module] = sum(1 for _, _, files in walk(join(module_path, module)) if "__pycache__" not in files for f in files)
     current_thread().return_value = {
         "total": sum(info.values())
     } | info
 
 
 def mst_banner() -> Figlet:
+    """
+    Show any random banner with text shown MetaSploit-Toolkit
+    """
     banner_fonts = [
         'doh',
         'broadway',
@@ -120,6 +131,10 @@ def mst_banner() -> Figlet:
     return figlet.renderText(PACKAGE_INFO['name'])
 
 def banner(module_path):
+    """
+    Show banner,
+    Count module
+    """
     t1 = Thread(
         target=starting_console,
         args=()

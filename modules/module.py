@@ -3,7 +3,8 @@ from utilities.color import (
     green, 
     blue,
     red,
-    underline
+    underline,
+    yellow
 )
 from utilities.message import (
     success, 
@@ -31,13 +32,14 @@ class BaseModule:
             }
         }
         self.required_fields = []
-        self.reference_link = ["https://github.com/Dev-Bittu/metasploit-toolkit"]  # Reference Link for guidance
+        self.reference_links = ["https://github.com/Dev-Bittu/metasploit-toolkit"]  # Reference Link for guidance
         self.type = None  # Exploit/Auxiluary
         self.module_name = None # Exploit/Auxiliary path without exploit/auxiluary written on it
+        self.about = "About this module, how it work"
 
     def run(self):
         for required_option in self.options["required"].keys():
-            if self.options["required"][required_option]["value"] is None and self.options["required"][required_option]["value"] is None:
+            if self.options["required"][required_option]["value"] is None and self.options["required"][required_option]["default"] is None:
                 print(
                     danger(f"Option {required_option} is required, Set its value first.\nRun this command to set value.\n\tset {required_option} <value>")
                 )
@@ -67,7 +69,7 @@ class BaseModule:
             success(f"{self.type}... done")
         )
     def change_shell_input(self, console_object=None):
-        console_object.shell_input = f"{underline('mst')} {red(self.type+'(')}{green(self.module_name)}{red(')')} > "
+        console_object.shell_input = f"{underline('mst')} {red(self.type)}{yellow('(')}{green(self.module_name)}{yellow(')')} > "
 
 
 class BaseExploit(BaseModule):
