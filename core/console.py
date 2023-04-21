@@ -91,8 +91,11 @@ class Console:
                 join("modules", module_name).replace("/","."), 
                 "."
             )
-            if module_name.split("/")[0] == "exploit":
+            if (module:=module_name.split("/")[0]) == "exploit":
                 self.current_module = m.Exploit()
+                self.current_module.onload(self)
+            elif module == "auxiliary":
+                self.current_module = m.Auxiliary()
                 self.current_module.onload(self)
         else:
             print(
